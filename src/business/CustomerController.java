@@ -2,7 +2,7 @@ package business;
 
 import core.Helper;
 import dao.CustomerDao;
-import entitiy.Customer;
+import entity.Customer;
 
 import java.util.ArrayList;
 
@@ -11,7 +11,7 @@ public class CustomerController {
     private final CustomerDao customerDao = new CustomerDao() ;
 
     public ArrayList<Customer> findAll() {
-        return this.customerDao.findAll();
+        return this.customerDao.findAllCustomers();
     }
 
     public boolean save(Customer customer) {

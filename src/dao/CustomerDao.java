@@ -1,7 +1,7 @@
 package dao;
 import core.Database;
-import entitiy.Customer;
-import entitiy.User;
+import entity.Customer;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -15,7 +15,7 @@ public class CustomerDao {
         this.connection = Database.getInstance();
     }
 
-    public ArrayList<Customer> findAll(){
+    public ArrayList<Customer> findAllCustomers(){
         ArrayList<Customer> customers = new ArrayList<>();
         try {
             ResultSet resultSet = this.connection.createStatement().executeQuery("SELECT * FROM customer");
@@ -68,6 +68,7 @@ public class CustomerDao {
     public Customer findById(int id){
         Customer customer = null;
         String query = "SELECT * FROM CUSTOMER WHERE id = ?";
+
         try {
             PreparedStatement pr = this.connection.prepareStatement(query);
             pr.setInt(1, id);

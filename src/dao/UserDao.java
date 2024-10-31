@@ -1,7 +1,7 @@
 package dao;
 
 import core.Database;
-import entitiy.User;
+import entity.User;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;

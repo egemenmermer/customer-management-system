@@ -2,7 +2,7 @@ package business;
 
 import core.Helper;
 import dao.UserDao;
-import entitiy.User;
+import entity.User;
 
 public class UserController {
 

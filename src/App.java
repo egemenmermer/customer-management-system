@@ -1,7 +1,7 @@
 import business.UserController;
 import core.Database;
 import core.Helper;
-import entitiy.User;
+import entity.User;
 import view.DashboardUI;
 import view.LoginUI;
 import java.sql.Connection;

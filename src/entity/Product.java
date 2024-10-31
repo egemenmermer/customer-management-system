@@ -1,4 +1,4 @@
-package entitiy;
+package entity;
 
 public class Product {
     private String name;
@@ -7,6 +7,10 @@ public class Product {
     private int stock;
     private int id;
 
+    public enum TYPE{
+        PERSON,
+        COMPANY
+    }
 
     public int getId() {
         return id;

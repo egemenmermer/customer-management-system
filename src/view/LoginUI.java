@@ -2,7 +2,7 @@ package view;
 
 import business.UserController;
 import core.Helper;
-import entitiy.User;
+import entity.User;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;

@@ -2,18 +2,16 @@ package view;
 
 import business.CustomerController;
 import core.Helper;
-import entitiy.Customer;
+import entity.Customer;
 
 import javax.swing.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 
 public class CustomerUI extends JFrame {
     private JPanel container;
     private JTextField fld_customer_name;
     private JComboBox<Customer.TYPE> cmb_customer_type;
-    private JLabel lbl_title;
-    private JLabel lbl_name;
+    private JLabel lbl_c_title;
+    private JLabel lbl_c_name;
     private JLabel lbl_customer_mail;
     private JTextField fld_customer_mail;
     private JTextArea tarea_customer_address;
@@ -38,9 +36,9 @@ public class CustomerUI extends JFrame {
         this.cmb_customer_type.setModel(new DefaultComboBoxModel<>(Customer.TYPE.values()));
 
         if(customer.getId() == 0){
-            this.lbl_title.setText("Add Customer");
+            this.lbl_c_title.setText("Add Customer");
         } else {
-            this.lbl_title.setText("Edit Customer");
+            this.lbl_c_title.setText("Edit Customer");
             this.fld_customer_name.setText(customer.getName());
             this.fld_customer_mail.setText(customer.getMail());
             this.fld_customer_phone.setText(customer.getPhone());

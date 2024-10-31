@@ -44,7 +44,7 @@ public class Helper {
         String msg;
         String title = switch (message) {
             case "fill" -> {
-                msg = "The email address and password can not be empty!";
+                msg = "The fields can not be empty!";
                 yield "Error";
             }
             case "done" -> {

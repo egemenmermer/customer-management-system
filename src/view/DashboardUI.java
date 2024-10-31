@@ -1,9 +1,11 @@
 package view;
 
 import business.CustomerController;
+import business.ProductController;
 import core.Helper;
-import entitiy.Customer;
-import entitiy.User;
+import entity.Customer;
+import entity.Product;
+import entity.User;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.event.*;
@@ -40,12 +42,17 @@ public class DashboardUI extends JFrame {
     private JLabel lbl_f_stock_status;
     private User user;
     private CustomerController customerController;
+    private ProductController productController;
     private DefaultTableModel tmdl_customer = new DefaultTableModel();
+    private DefaultTableModel tmdl_product = new DefaultTableModel();
     private JPopupMenu popup_customer = new JPopupMenu();
+    private JPopupMenu popup_product = new JPopupMenu();
 
     public DashboardUI(User user) {
         this.user = user;
         this.customerController = new CustomerController();
+        this.productController = new ProductController();
+
         this.tmdl_customer = new DefaultTableModel();
         this.tbl_customer.setModel(tmdl_customer);
         if (user == null) {
@@ -69,11 +76,20 @@ public class DashboardUI extends JFrame {
 
         //Customer Tab
         loadCustomerTable(null);
-        loadPopUpMenu();
+        loadCustomerPopUpMenu();
         loadCustomerButtonEvent();
         this.cmb_f_customer_type.setModel(new DefaultComboBoxModel<>(Customer.TYPE.values()));
         this.cmb_f_customer_type.setSelectedItem(null);
 
+        //Product Tab
+        loadProductTable(null);
+        loadProductPopUpMenu();
+        loadProductButtonEvent();
+
+
+        btn_product_edit.addActionListener(e -> {
+
+        });
     }
 
     private void loadCustomerButtonEvent() {
@@ -102,14 +118,77 @@ public class DashboardUI extends JFrame {
         });
     }
 
-    private void loadPopUpMenu() {
-        this.tbl_customer.addMouseListener(new MouseAdapter() {
+    private void loadProductButtonEvent() {
+        this.btn_product_edit.addActionListener(e -> {
+            ProductUI productUI = new ProductUI(new Product());
+            productUI.addWindowListener(new WindowAdapter() {
+                @Override
+                public void windowClosed(WindowEvent e) {
+                    loadProductTable(null);
+                }
+            });
+        });
+
+        /*this.btn_product_search.addActionListener(e -> {
+            ArrayList<Customer> filteredCustomers = this.customerController.filterCustomerTable(
+                    this.fld_f_product_name.getText(),
+                    this.fld_f_product_code.getText(),
+                    (Product.TYPE) cmb_f_stock_status.getSelectedItem()
+            );
+            loadCustomerTable(filteredCustomers);
+        });
+
+         */
+        /*
+        btn_customer_clear_filter.addActionListener(e -> {
+            loadCustomerTable(null);
+            this.fld_f_customer_name.setText(null);
+            this.cmb_f_customer_type.setSelectedItem(null);
+        });
+
+         */
+    }
+    private void loadProductPopUpMenu() {
+
+        this.tbl_product.addMouseListener(new MouseAdapter() {
             public void mouseClicked(MouseEvent e) {
-                int selectedRow = tbl_customer.rowAtPoint(e.getPoint());
-                tbl_customer.setRowSelectionInterval(selectedRow, selectedRow);
+                int selectedRow = tbl_product.rowAtPoint(e.getPoint());
+                tbl_product.setRowSelectionInterval(selectedRow, selectedRow);
             }
         });
-        this.popup_customer.add("Update").addActionListener(e -> {
+        this.popup_product.add("Update").addActionListener(e -> {
+            int selectedId = Integer.parseInt(tbl_product.getValueAt(tbl_product.getSelectedRow(), 0).toString());
+            ProductUI productUI = new ProductUI(this.productController.findById(selectedId));
+            productUI.addWindowListener(new WindowAdapter() {
+                @Override
+                public void windowClosed(WindowEvent e) {
+                    loadProductTable(null);
+                }
+            });
+        });
+        this.popup_product.add("Delete").addActionListener(e -> {
+            int selectedId = Integer.parseInt(tbl_product.getValueAt(tbl_product.getSelectedRow(), 0).toString());
+            if(Helper.confirm("sure")){
+                if(this.productController.delete(selectedId)) {
+                    Helper.showMsg("Success!");
+                    loadProductTable(null);
+                }else{
+                    Helper.showMsg("error");
+                }
+            }
+        });
+
+        this.tbl_product.setComponentPopupMenu(this.popup_product);
+    }
+    private void loadCustomerPopUpMenu() {
+
+        this.tbl_customer.addMouseListener(new MouseAdapter() {
+            public void mouseClicked(MouseEvent e) {
+                    int selectedRow = tbl_customer.rowAtPoint(e.getPoint());
+                    tbl_customer.setRowSelectionInterval(selectedRow, selectedRow);
+            }
+        });
+        popup_customer.add("Update").addActionListener(e -> {
             int selectedId = Integer.parseInt(tbl_customer.getValueAt(tbl_customer.getSelectedRow(), 0).toString());
             CustomerUI customerUI = new CustomerUI(this.customerController.findById(selectedId));
             customerUI.addWindowListener(new WindowAdapter() {
@@ -135,7 +214,34 @@ public class DashboardUI extends JFrame {
 
         this.tbl_customer.setComponentPopupMenu(this.popup_customer);
     }
+    private void loadProductTable(ArrayList<Product> products) {
+        if(tmdl_product.getColumnCount() == 0){
+            Object[] columnProduct = {"ID", "Product Name", "Product Code", "Price", "Stock"};
+            tmdl_product.setColumnIdentifiers(columnProduct);
+        }
 
+        if(products == null){
+            products = this.productController.findAll();
+        }
+
+        DefaultTableModel model = (DefaultTableModel) this.tbl_product.getModel();
+        this.tmdl_product.setRowCount(0);
+
+        for (Product product : products){
+            Object[] rowObject = {
+                    product.getId(),
+                    product.getName(),
+                    product.getCode(),
+                    product.getPrice(),
+                    product.getStock()
+            };
+            this.tmdl_product.addRow(rowObject);
+        }
+        this.tbl_product.setModel(tmdl_product);
+        this.tbl_product.getTableHeader().setReorderingAllowed(false);
+        this.tbl_product.getColumnModel().getColumn(0).setPreferredWidth(50);
+        this.tbl_product.setEnabled(false);
+    }
     private void loadCustomerTable(ArrayList<Customer> customers) {
         if (tmdl_customer.getColumnCount() == 0) {
             Object[] columnCustomer = {"ID", "Customer Name", "Account Type", "Phone", "E-mail", "Address"};
@@ -161,7 +267,10 @@ public class DashboardUI extends JFrame {
             tmdl_customer.addRow(rowObject);
         }
 
-        tbl_customer.setModel(tmdl_customer);
+        this.tbl_customer.setModel(tmdl_customer);
+        this.tbl_customer.getTableHeader().setReorderingAllowed(false);
+        this.tbl_customer.getColumnModel().getColumn(0).setPreferredWidth(50);
+        this.tbl_customer.setEnabled(false);
     }
 }
 
