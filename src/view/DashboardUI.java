@@ -3,6 +3,7 @@ package view;
 import business.CustomerController;
 import business.ProductController;
 import core.Helper;
+import core.Item;
 import entity.Customer;
 import entity.Product;
 import entity.User;
@@ -33,7 +34,7 @@ public class DashboardUI extends JFrame {
     private JPanel pnl_filter_product;
     private JTextField fld_f_product_name;
     private JTextField fld_f_product_code;
-    private JComboBox cmb_f_stock_status;
+    private JComboBox<Item> cmb_f_stock_status;
     private JButton btn_product_search;
     private JButton btn_product_edit;
     private JButton btn_clear_product_filter;
@@ -85,11 +86,12 @@ public class DashboardUI extends JFrame {
         loadProductTable(null);
         loadProductPopUpMenu();
         loadProductButtonEvent();
+        this.cmb_f_stock_status.addItem(new Item(1, "In Stock!"));
+        this.cmb_f_stock_status.addItem(new Item(2, "Out of Stock!"));
+        this.cmb_f_stock_status.setSelectedItem(null);
 
 
-        btn_product_edit.addActionListener(e -> {
 
-        });
     }
 
     private void loadCustomerButtonEvent() {
@@ -129,24 +131,21 @@ public class DashboardUI extends JFrame {
             });
         });
 
-        /*this.btn_product_search.addActionListener(e -> {
-            ArrayList<Customer> filteredCustomers = this.customerController.filterCustomerTable(
+        this.btn_product_search.addActionListener(e -> {
+            ArrayList<Product> filteredProducts = this.productController.filterProductTable(
                     this.fld_f_product_name.getText(),
                     this.fld_f_product_code.getText(),
-                    (Product.TYPE) cmb_f_stock_status.getSelectedItem()
+                    (Item) this.cmb_f_stock_status.getSelectedItem()
             );
-            loadCustomerTable(filteredCustomers);
+            loadProductTable(filteredProducts);
         });
 
-         */
-        /*
-        btn_customer_clear_filter.addActionListener(e -> {
-            loadCustomerTable(null);
-            this.fld_f_customer_name.setText(null);
-            this.cmb_f_customer_type.setSelectedItem(null);
+        this.btn_clear_product_filter.addActionListener(e -> {
+            this.fld_f_product_name.setText(null);
+            this.fld_f_product_code.setText(null);
+            this.cmb_f_stock_status.setSelectedItem(null);
+            loadProductTable(null);
         });
-
-         */
     }
     private void loadProductPopUpMenu() {
         this.tbl_product.addMouseListener(new MouseAdapter() {
@@ -192,40 +191,6 @@ public class DashboardUI extends JFrame {
             }
         });
     }
-
-        /*
-        this.tbl_product.addMouseListener(new MouseAdapter() {
-            public void mouseClicked(MouseEvent e) {
-                int selectedRow = tbl_product.rowAtPoint(e.getPoint());
-                tbl_product.setRowSelectionInterval(selectedRow, selectedRow);
-            }
-        });
-        this.popup_product.add("Update").addActionListener(e -> {
-            int selectedId = Integer.parseInt(tbl_product.getValueAt(tbl_product.getSelectedRow(), 0).toString());
-            ProductUI productUI = new ProductUI(this.productController.findById(selectedId));
-            productUI.addWindowListener(new WindowAdapter() {
-                @Override
-                public void windowClosed(WindowEvent e) {
-                    loadProductTable(null);
-                }
-            });
-        });
-        this.popup_product.add("Delete").addActionListener(e -> {
-            int selectedId = Integer.parseInt(tbl_product.getValueAt(tbl_product.getSelectedRow(), 0).toString());
-            if(Helper.confirm("sure")){
-                if(this.productController.delete(selectedId)) {
-                    Helper.showMsg("Success!");
-                    loadProductTable(null);
-                }else{
-                    Helper.showMsg("error");
-                }
-            }
-        });
-
-        this.tbl_product.setComponentPopupMenu(this.popup_product);
-    }
-
-         */
         private void loadCustomerPopUpMenu() {
             this.tbl_customer.addMouseListener(new MouseAdapter() {
                 @Override
@@ -270,39 +235,6 @@ public class DashboardUI extends JFrame {
                 }
             });
         }
-        /*
-        this.tbl_customer.addMouseListener(new MouseAdapter() {
-            public void mouseClicked(MouseEvent e) {
-                    int selectedRow = tbl_customer.rowAtPoint(e.getPoint());
-                    tbl_customer.setRowSelectionInterval(selectedRow, selectedRow);
-            }
-        });
-        popup_customer.add("Update").addActionListener(e -> {
-            int selectedId = Integer.parseInt(tbl_customer.getValueAt(tbl_customer.getSelectedRow(), 0).toString());
-            CustomerUI customerUI = new CustomerUI(this.customerController.findById(selectedId));
-            customerUI.addWindowListener(new WindowAdapter() {
-                @Override
-                public void windowClosed(WindowEvent e) {
-                    loadCustomerTable(null);
-                }
-            });
-        });
-        this.popup_customer.add("Delete").addActionListener(e -> {
-            int selectedId = Integer.parseInt(tbl_customer.getValueAt(tbl_customer.getSelectedRow(), 0).toString());
-            if(Helper.confirm("sure")){
-                if(this.customerController.delete(selectedId)) {
-                    Helper.showMsg("Success!");
-                    loadCustomerTable(null);
-                }else{
-                    Helper.showMsg("error");
-                }
-            }
-        });
-
-        this.tbl_customer.setComponentPopupMenu(this.popup_customer);
-    }
-
-         */
     private void loadProductTable(ArrayList<Product> products) {
         if(tmdl_product.getColumnCount() == 0){
             Object[] columnProduct = {"ID", "Product Name", "Product Code", "Price", "Stock"};
