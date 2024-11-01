@@ -149,7 +149,51 @@ public class DashboardUI extends JFrame {
          */
     }
     private void loadProductPopUpMenu() {
+        this.tbl_product.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mousePressed(MouseEvent e) {
+                showPopup(e);
+            }
 
+            @Override
+            public void mouseReleased(MouseEvent e) {
+                showPopup(e);
+            }
+
+            private void showPopup(MouseEvent e) {
+                if (e.isPopupTrigger()) {
+                    int row = tbl_product.rowAtPoint(e.getPoint());
+                    tbl_product.setRowSelectionInterval(row, row);
+                    popup_product.show(e.getComponent(), e.getX(), e.getY());
+                }
+            }
+        });
+
+        this.popup_product.add("Update").addActionListener(e -> {
+            int selectedId = Integer.parseInt(tbl_product.getValueAt(tbl_product.getSelectedRow(), 0).toString());
+            ProductUI productUI = new ProductUI(this.productController.findById(selectedId));
+            productUI.addWindowListener(new WindowAdapter() {
+                @Override
+                public void windowClosed(WindowEvent e) {
+                    loadProductTable(null);
+                }
+            });
+        });
+
+        this.popup_product.add("Delete").addActionListener(e -> {
+            int selectedId = Integer.parseInt(tbl_product.getValueAt(tbl_product.getSelectedRow(), 0).toString());
+            if (Helper.confirm("Are you sure?")) {
+                if (this.productController.delete(selectedId)) {
+                    Helper.showMsg("Product deleted successfully!");
+                    loadProductTable(null);
+                } else {
+                    Helper.showMsg("Error deleting product.");
+                }
+            }
+        });
+    }
+
+        /*
         this.tbl_product.addMouseListener(new MouseAdapter() {
             public void mouseClicked(MouseEvent e) {
                 int selectedRow = tbl_product.rowAtPoint(e.getPoint());
@@ -180,8 +224,53 @@ public class DashboardUI extends JFrame {
 
         this.tbl_product.setComponentPopupMenu(this.popup_product);
     }
-    private void loadCustomerPopUpMenu() {
 
+         */
+        private void loadCustomerPopUpMenu() {
+            this.tbl_customer.addMouseListener(new MouseAdapter() {
+                @Override
+                public void mousePressed(MouseEvent e) {
+                    showPopup(e);
+                }
+
+                @Override
+                public void mouseReleased(MouseEvent e) {
+                    showPopup(e);
+                }
+
+                private void showPopup(MouseEvent e) {
+                    if (e.isPopupTrigger()) {
+                        int row = tbl_customer.rowAtPoint(e.getPoint());
+                        tbl_customer.setRowSelectionInterval(row, row);
+                        popup_customer.show(e.getComponent(), e.getX(), e.getY());
+                    }
+                }
+            });
+
+            this.popup_customer.add("Update").addActionListener(e -> {
+                int selectedId = Integer.parseInt(tbl_customer.getValueAt(tbl_customer.getSelectedRow(), 0).toString());
+                CustomerUI customerUI = new CustomerUI(this.customerController.findById(selectedId));
+                customerUI.addWindowListener(new WindowAdapter() {
+                    @Override
+                    public void windowClosed(WindowEvent e) {
+                        loadCustomerTable(null);
+                    }
+                });
+            });
+
+            this.popup_customer.add("Delete").addActionListener(e -> {
+                int selectedId = Integer.parseInt(tbl_customer.getValueAt(tbl_customer.getSelectedRow(), 0).toString());
+                if (Helper.confirm("Are you sure?")) {
+                    if (this.customerController.delete(selectedId)) {
+                        Helper.showMsg("Customer deleted successfully!");
+                        loadCustomerTable(null);
+                    } else {
+                        Helper.showMsg("Error deleting customer.");
+                    }
+                }
+            });
+        }
+        /*
         this.tbl_customer.addMouseListener(new MouseAdapter() {
             public void mouseClicked(MouseEvent e) {
                     int selectedRow = tbl_customer.rowAtPoint(e.getPoint());
@@ -196,8 +285,6 @@ public class DashboardUI extends JFrame {
                 public void windowClosed(WindowEvent e) {
                     loadCustomerTable(null);
                 }
-
-
             });
         });
         this.popup_customer.add("Delete").addActionListener(e -> {
@@ -214,6 +301,8 @@ public class DashboardUI extends JFrame {
 
         this.tbl_customer.setComponentPopupMenu(this.popup_customer);
     }
+
+         */
     private void loadProductTable(ArrayList<Product> products) {
         if(tmdl_product.getColumnCount() == 0){
             Object[] columnProduct = {"ID", "Product Name", "Product Code", "Price", "Stock"};
