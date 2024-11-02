@@ -18,7 +18,7 @@ public class CartDao {
         this.productDao = new ProductDao();
     }
 
-    public boolean saveCart(Cart cart){
+    public boolean saveBasket(Cart cart){
         String query = "INSERT INTO cart " +
                 "("
                 + "product_id"
@@ -43,7 +43,7 @@ public class CartDao {
         }
         return false;
     }
-    public ArrayList<Cart> findALlCart(){
+    public ArrayList<Cart> findAllBasket(){
         ArrayList<Cart> carts = new ArrayList<>();
         try {
             ResultSet resultSet = this.connection.createStatement().executeQuery("SELECT * FROM cart");
@@ -57,7 +57,7 @@ public class CartDao {
     }
 
     public Cart match(ResultSet resultSet) throws SQLException {
-        Cart cart   = new Cart();
+        Cart cart = new Cart();
         cart.setId(resultSet.getInt("id"));
         cart.setProductId(resultSet.getInt("product_id"));
         cart.setProduct(productDao.findById(resultSet.getInt("product_id")));

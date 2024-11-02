@@ -109,6 +109,7 @@ public class DashboardUI extends JFrame {
         loadCartTable();
         loadCartButtonEvent();
         loadCartCustomerCombo();
+
     }
 
 
@@ -125,11 +126,71 @@ public class DashboardUI extends JFrame {
         this.btn_f_clear_cart.addActionListener(e -> {
             if(this.cartController.clear()){
                 Helper.showMsg("Cart emptied!");
+                loadCartTable();  // Ensures cart table reloads
+            } else {
+                Helper.showMsg("Error clearing cart.");
+            }
+        });
+
+        btn_cart_add.addActionListener(e -> {
+            Item selectedCustomer = (Item) this.cmb_cart_customer.getSelectedItem();
+            if(selectedCustomer == null){
+                Helper.showMsg("Please select a customer!");
+            } else {
+                Customer customer = this.customerController.findById(selectedCustomer.getKey());
+                ArrayList<Cart> carts = this.cartController.findAll();
+                if(customer.getId() == 0){
+                    Helper.showMsg("There is no such customer!");
+                } else if(carts.size() == 0){
+                    Helper.showMsg("Please add product to the cart!");
+                } else {
+                    OrderUI orderUI = new OrderUI(customer);
+                    orderUI.addWindowListener(new WindowAdapter() {
+                        @Override
+                        public void windowClosed(WindowEvent e) {
+                            loadCartTable();  // Ensure cart is reloaded after closing OrderUI
+                            loadProductTable(null);
+                        }
+                    });
+                }
+            }
+        });
+        /*
+        this.btn_f_clear_cart.addActionListener(e -> {
+            if(this.cartController.clear()){
+                Helper.showMsg("Cart emptied!");
                 loadCartTable();
             }else{
                 Helper.showMsg("error");
             }
         });
+
+        this.btn_cart_add.addActionListener(e -> {
+            Item selectedCustomer = (Item) this.cmb_cart_customer.getSelectedItem();
+            if(selectedCustomer == null){
+                Helper.showMsg("Please select a customer!");
+            } else{
+                Customer customer = this.customerController.findById(selectedCustomer.getKey());
+                ArrayList<Cart> carts = this.cartController.findAll();
+                if(customer.getId() == 0){
+                    Helper.showMsg("There is no such customer!");
+                }else if(carts.size() == 0){
+                    Helper.showMsg("Please add product to the cart!");
+                }else{
+                    OrderUI orderUI = new OrderUI(customer);
+                    orderUI.addWindowListener(new WindowAdapter() {
+                        @Override
+                        public void windowClosing(WindowEvent e) {
+                            loadCartTable();
+                            loadProductTable(null);
+                        }
+
+                    });
+                }
+            }
+        });
+
+         */
     }
     private void loadCustomerButtonEvent() {
         this.btn_customer_new.addActionListener(e -> {
@@ -244,7 +305,7 @@ public class DashboardUI extends JFrame {
                     Helper.showMsg("Product added successfully!");
                     loadCartTable();
                 }else{
-                    Helper.showMsg("Error adding cart.");
+                    Helper.showMsg("Error adding to cart.");
                 }
             }
         });
