@@ -1,9 +1,11 @@
 package view;
 
+import business.CartController;
 import business.CustomerController;
 import business.ProductController;
 import core.Helper;
 import core.Item;
+import entity.Cart;
 import entity.Customer;
 import entity.Product;
 import entity.User;
@@ -41,11 +43,23 @@ public class DashboardUI extends JFrame {
     private JLabel lbl_f_product_name;
     private JLabel lbl_f_product_code;
     private JLabel lbl_f_stock_status;
+    private JPanel pnl_cart;
+    private JPanel pnl_cart_top;
+    private JScrollPane scrl_cart;
+    private JComboBox<Item> cmb_cart_customer;
+    private JLabel lbl_cart_customer;
+    private JButton btn_f_clear_cart;
+    private JButton btn_cart_add;
+    private JLabel lbl_cart_p_quantity;
+    private JLabel lbl_cart_price;
+    private JTable tbl_cart;
     private User user;
     private CustomerController customerController;
     private ProductController productController;
+    private CartController cartController;
     private DefaultTableModel tmdl_customer = new DefaultTableModel();
     private DefaultTableModel tmdl_product = new DefaultTableModel();
+    private DefaultTableModel tmdl_cart = new DefaultTableModel();
     private JPopupMenu popup_customer = new JPopupMenu();
     private JPopupMenu popup_product = new JPopupMenu();
 
@@ -53,6 +67,7 @@ public class DashboardUI extends JFrame {
         this.user = user;
         this.customerController = new CustomerController();
         this.productController = new ProductController();
+        this.cartController = new CartController();
 
         this.tmdl_customer = new DefaultTableModel();
         this.tbl_customer.setModel(tmdl_customer);
@@ -90,10 +105,32 @@ public class DashboardUI extends JFrame {
         this.cmb_f_stock_status.addItem(new Item(2, "Out of Stock!"));
         this.cmb_f_stock_status.setSelectedItem(null);
 
-
-
+        //Cart Tab
+        loadCartTable();
+        loadCartButtonEvent();
+        loadCartCustomerCombo();
     }
 
+
+    private void loadCartCustomerCombo(){
+        ArrayList<Customer> customers = this.customerController.findAll();
+        this.cmb_cart_customer.removeAllItems();
+
+        for (Customer customer : customers) {
+            this.cmb_cart_customer.addItem(new Item(customer.getId(), customer.getName()));
+        }
+        this.cmb_cart_customer.setSelectedItem(null);
+    }
+    private void loadCartButtonEvent(){
+        this.btn_f_clear_cart.addActionListener(e -> {
+            if(this.cartController.clear()){
+                Helper.showMsg("Cart emptied!");
+                loadCartTable();
+            }else{
+                Helper.showMsg("error");
+            }
+        });
+    }
     private void loadCustomerButtonEvent() {
         this.btn_customer_new.addActionListener(e -> {
             CustomerUI customerUI = new CustomerUI(new Customer());
@@ -101,6 +138,7 @@ public class DashboardUI extends JFrame {
                 @Override
                 public void windowClosed(WindowEvent e) {
                     loadCustomerTable(null);
+                    loadCartCustomerCombo();
                 }
             });
         });
@@ -175,6 +213,7 @@ public class DashboardUI extends JFrame {
                 @Override
                 public void windowClosed(WindowEvent e) {
                     loadProductTable(null);
+                    loadCartTable();
                 }
             });
         });
@@ -185,8 +224,27 @@ public class DashboardUI extends JFrame {
                 if (this.productController.delete(selectedId)) {
                     Helper.showMsg("Product deleted successfully!");
                     loadProductTable(null);
+                    loadCartTable();
                 } else {
                     Helper.showMsg("Error deleting product.");
+                }
+            }
+        });
+
+        this.popup_product.add("Add to Cart").addActionListener(e -> {
+            int selectedId = Integer.parseInt(tbl_product.getValueAt(tbl_product.getSelectedRow(), 0).toString());
+            Product cartProduct = this.productController.findById(selectedId);
+
+            if(cartProduct.getStock() <= 0){
+                Helper.showMsg("Product not in stock!");
+            }else {
+                Cart cart = new Cart(cartProduct.getId());
+                boolean result = false;
+                if(this.cartController.save(cart)){
+                    Helper.showMsg("Product added successfully!");
+                    loadCartTable();
+                }else{
+                    Helper.showMsg("Error adding cart.");
                 }
             }
         });
@@ -219,6 +277,7 @@ public class DashboardUI extends JFrame {
                     @Override
                     public void windowClosed(WindowEvent e) {
                         loadCustomerTable(null);
+                        loadCartCustomerCombo();
                     }
                 });
             });
@@ -229,6 +288,7 @@ public class DashboardUI extends JFrame {
                     if (this.customerController.delete(selectedId)) {
                         Helper.showMsg("Customer deleted successfully!");
                         loadCustomerTable(null);
+                        loadCartCustomerCombo();
                     } else {
                         Helper.showMsg("Error deleting customer.");
                     }
@@ -287,11 +347,40 @@ public class DashboardUI extends JFrame {
             };
             tmdl_customer.addRow(rowObject);
         }
-
         this.tbl_customer.setModel(tmdl_customer);
         this.tbl_customer.getTableHeader().setReorderingAllowed(false);
         this.tbl_customer.getColumnModel().getColumn(0).setPreferredWidth(50);
         this.tbl_customer.setEnabled(false);
+    }
+
+    private void loadCartTable() {
+        if (tmdl_cart.getColumnCount() == 0) {
+            Object[] columnProduct = {"ID", "Product Name", "Product Code", "Price", "Stock"};
+            tmdl_cart.setColumnIdentifiers(columnProduct);
+        }
+
+        tmdl_cart.setRowCount(0);
+
+        ArrayList<Cart> carts = this.cartController.findAll();
+        int totalPrice = 0;
+        for (Cart cart : carts) {
+            Object[] rowObject = {
+                    cart.getId(),
+                    cart.getProduct().getName(),
+                    cart.getProduct().getCode(),
+                    cart.getProduct().getPrice(),
+                    cart.getProduct().getStock()
+            };
+            tmdl_cart.addRow(rowObject);
+            totalPrice += cart.getProduct().getPrice();
+        }
+        this.lbl_cart_price.setText(totalPrice + " $");
+        this.lbl_cart_p_quantity.setText(String.valueOf(carts.size()));
+
+        this.tbl_cart.setModel(tmdl_cart);
+        this.tbl_cart.getTableHeader().setReorderingAllowed(false);
+        this.tbl_cart.getColumnModel().getColumn(0).setPreferredWidth(50);
+        this.tbl_cart.setEnabled(false);
     }
 }
 
