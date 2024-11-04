@@ -24,12 +24,14 @@ public class OrderDao {
 
     public ArrayList<Order> findAll(){
         ArrayList<Order> orders = new ArrayList<>();
+        String query = "SELECT * FROM `order`"; // Wrap order in backticks
         try {
-            ResultSet resultSet = this.connection.createStatement().executeQuery("SELECT * FROM order");
-            while(resultSet.next()){
+            PreparedStatement preparedStatement = this.connection.prepareStatement(query);
+            ResultSet resultSet = preparedStatement.executeQuery();
+            while(resultSet.next()) {
                 orders.add(this.match(resultSet));
             }
-        }catch (SQLException e){
+        } catch (SQLException e) {
             e.printStackTrace();
         }
         return orders;
@@ -49,13 +51,7 @@ public class OrderDao {
     }
 
     public boolean saveOrder(Order order){
-        String query = "INSERT INTO `order` (" +
-                "customer_id, " +
-                "product_id, " +
-                "price, " +
-                "`date`, " +
-                "note) VALUES (?, ?, ?, ?, ?)";
-
+        String query = "INSERT INTO `order` (customer_id, product_id, price, `date`, note) VALUES (?, ?, ?, ?, ?)";
         try {
             PreparedStatement preparedStatement = this.connection.prepareStatement(query);
             preparedStatement.setInt(1, order.getCustomerId());
@@ -70,4 +66,5 @@ public class OrderDao {
         }
     }
 
-}
+    }
+

@@ -3,12 +3,11 @@ package view;
 import business.CartController;
 import business.CustomerController;
 import business.ProductController;
+import business.OrderController;
 import core.Helper;
 import core.Item;
-import entity.Cart;
-import entity.Customer;
-import entity.Product;
-import entity.User;
+import entity.*;
+
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.event.*;
@@ -53,13 +52,18 @@ public class DashboardUI extends JFrame {
     private JLabel lbl_cart_p_quantity;
     private JLabel lbl_cart_price;
     private JTable tbl_cart;
+    private JScrollPane scrl_order;
+    private JPanel pnl_order;
+    private JTable tbl_order;
     private User user;
     private CustomerController customerController;
     private ProductController productController;
     private CartController cartController;
+    private OrderController orderController;
     private DefaultTableModel tmdl_customer = new DefaultTableModel();
     private DefaultTableModel tmdl_product = new DefaultTableModel();
     private DefaultTableModel tmdl_cart = new DefaultTableModel();
+    private DefaultTableModel tmdl_order = new DefaultTableModel();
     private JPopupMenu popup_customer = new JPopupMenu();
     private JPopupMenu popup_product = new JPopupMenu();
 
@@ -68,6 +72,7 @@ public class DashboardUI extends JFrame {
         this.customerController = new CustomerController();
         this.productController = new ProductController();
         this.cartController = new CartController();
+        this.orderController = new OrderController();
 
         this.tmdl_customer = new DefaultTableModel();
         this.tbl_customer.setModel(tmdl_customer);
@@ -110,8 +115,66 @@ public class DashboardUI extends JFrame {
         loadCartButtonEvent();
         loadCartCustomerCombo();
 
+        //Order Tab
+        loadOrderTable();
+
     }
 
+
+    private void loadOrderTable() {
+        if (tmdl_order.getColumnCount() == 0) {
+            Object[] columnOrder = {"ID", "Customer Name", "Product Name", "Price", "Order Date", "Note"};
+            tmdl_order.setColumnIdentifiers(columnOrder);
+        }
+
+        ArrayList<Order> orders = this.orderController.findAll();
+        System.out.println("Orders size: " + orders.size()); // Debug line to check if data is fetched
+
+        tmdl_order.setRowCount(0); // Clear existing rows
+
+        for (Order order : orders) {
+
+            Object[] rowObject = {
+                    order.getId(),
+                    order.getCustomer().getName(),
+                    order.getProduct().getName(),
+                    order.getPrice(),
+                    order.getDate(),
+                    order.getNote()
+            };
+            tmdl_order.addRow(rowObject);
+        }
+
+        tbl_order.setModel(tmdl_order);
+        tbl_order.getTableHeader().setReorderingAllowed(false);
+        tbl_order.getColumnModel().getColumn(0).setPreferredWidth(50);
+        tbl_order.repaint(); // Optional, to ensure the UI refreshes
+        /*
+        Object[] columnOrder = {"ID", "Customer Name", "Product Name", "Price", "Order Date", "Note"};
+        ArrayList<Order> orders = this.orderController.findAll();
+
+        DefaultTableModel clearModel = (DefaultTableModel) tbl_order.getModel();
+        clearModel.setRowCount(0);
+
+        this.tmdl_order.setColumnIdentifiers(columnOrder);
+        for (Order order : orders) {
+            Object[] rowObject = {
+                    order.getId(),
+                    order.getCustomer().getName(),
+                    order.getProduct().getName(),
+                    order.getPrice(),
+                    order.getDate(),
+                    order.getNote()
+            };
+            this.tmdl_order.addRow(rowObject);
+        }
+        this.tbl_order.setModel(tmdl_order);
+        this.tbl_order.getTableHeader().setReorderingAllowed(false);
+        this.tbl_order.getColumnModel().getColumn(0).setPreferredWidth(50);
+        this.tbl_order.setEnabled(false);
+
+         */
+    }
 
     private void loadCartCustomerCombo(){
         ArrayList<Customer> customers = this.customerController.findAll();
@@ -132,7 +195,7 @@ public class DashboardUI extends JFrame {
             }
         });
 
-        btn_cart_add.addActionListener(e -> {
+        this.btn_cart_add.addActionListener(e -> {
             Item selectedCustomer = (Item) this.cmb_cart_customer.getSelectedItem();
             if(selectedCustomer == null){
                 Helper.showMsg("Please select a customer!");
